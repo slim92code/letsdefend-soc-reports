@@ -1,4 +1,4 @@
-# soc-l1-triage
+# soc-triage
 
 10 closed-case incident reports from the [LetsDefend](https://letsdefend.io) SOC analyst platform.
 
