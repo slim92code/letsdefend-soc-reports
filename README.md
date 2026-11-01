@@ -4,7 +4,7 @@
 
 Each report follows a consistent 8-section format: Alert summary · Triage questions · Investigation · IOCs (defanged) · MITRE ATT&CK · Timeline · Verdict · Containment & escalation. Where the platform's own MITRE mapping was incomplete or used a parent technique instead of the correct sub-technique, the correction is flagged inline with *(not in PDF - added)* or *(PDF lists Txxx - corrected)*.
 
-**Analyst:** Stevan Mrkšić · BTL1 candidate · [LetsDefend profile](https://app.letsdefend.io/user/slim92code)
+**Analyst:** Stevan Mrkšić - [LetsDefend profile](https://app.letsdefend.io/user/slim92code)
 
 ---
 
