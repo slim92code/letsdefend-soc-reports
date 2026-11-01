@@ -1,4 +1,4 @@
-# SOC343 — WinRAR CVE-2025-8088 Path Traversal / RomCom RAT — Incident Report
+# SOC343 - WinRAR CVE-2025-8088 Path Traversal / RomCom RAT - Incident Report
 
 **Analyst:** Stevan Mrkšić · **Platform:** LetsDefend · **Alert:** SOC343 · **Date:** 2025
 
@@ -10,7 +10,7 @@
 | Platform | LetsDefend |
 | Threat Actor | UAC-0180 (RomCom) |
 | CVE | CVE-2025-8088 |
-| **Verdict** | **True Positive — Malware (RomCom RAT); persistence established; no lateral movement** |
+| **Verdict** | **True Positive - Malware (RomCom RAT); persistence established; no lateral movement** |
 
 ---
 
@@ -32,9 +32,9 @@ A spearphishing email delivered a malicious archive exploiting **CVE-2025-8088**
 
 ## 3. Investigation
 
-**3.1 Initial delivery — spearphishing lure**
+**3.1 Initial delivery - spearphishing lure**
 
-The phishing email delivered a file named `Eli_Rosenfeld_CV.pdf` — a fake job application CV used as the archive lure. The choice of a CV as a lure is consistent with UAC-0180's documented targeting of HR personnel and executives who regularly open unsolicited CVs. The archive was a `.rar` file that appeared to contain a PDF.
+The phishing email delivered a file named `Eli_Rosenfeld_CV.pdf` - a fake job application CV used as the archive lure. The choice of a CV as a lure is consistent with UAC-0180's documented targeting of HR personnel and executives who regularly open unsolicited CVs. The archive was a `.rar` file that appeared to contain a PDF.
 
 **3.2 CVE-2025-8088 exploitation**
 
@@ -47,9 +47,9 @@ The archive's path traversal entries caused WinRAR to extract `msedges.dll` to t
 1. `C:\Users\<victim>\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\`
 2. `C:\Users\<victim>\AppData\Local\Temp\`
 
-Placing `msedges.dll` directly in the Startup folder gives the DLL an initial execution opportunity on the next user login. The filename `msedges.dll` is deliberately crafted to masquerade as a legitimate Microsoft Edge component (`msedge.dll` is a real Edge library) — a masquerading technique to reduce suspicion if the file is inspected.
+Placing `msedges.dll` directly in the Startup folder gives the DLL an initial execution opportunity on the next user login. The filename `msedges.dll` is deliberately crafted to masquerade as a legitimate Microsoft Edge component (`msedge.dll` is a real Edge library) - a masquerading technique to reduce suspicion if the file is inspected.
 
-**3.4 COM Hijacking — persistence**
+**3.4 COM Hijacking - persistence**
 
 The malware established persistence via COM Hijacking by writing the following registry key:
 
@@ -58,7 +58,7 @@ HKCU\SOFTWARE\Classes\CLSID\{<GUID>}\InprocServer32
 Value: C:\Users\<victim>\AppData\...\msedges.dll
 ```
 
-When any application activates the hijacked COM CLSID, Windows loads `msedges.dll` from the attacker-controlled path. Because this key is under `HKCU` (user hive), it does not require administrator privileges — the malware operates entirely within the user context.
+When any application activates the hijacked COM CLSID, Windows loads `msedges.dll` from the attacker-controlled path. Because this key is under `HKCU` (user hive), it does not require administrator privileges - the malware operates entirely within the user context.
 
 **3.5 C2 activity**
 
@@ -74,8 +74,8 @@ Investigation found no evidence of lateral movement from the compromised host. N
 
 | Type | Value | Notes |
 |---|---|---|
-| Filename | Eli_Rosenfeld_CV.pdf | Phishing lure — fake CV archive |
-| Filename | msedges.dll | RomCom RAT payload — masquerading as Edge library |
+| Filename | Eli_Rosenfeld_CV.pdf | Phishing lure - fake CV archive |
+| Filename | msedges.dll | RomCom RAT payload - masquerading as Edge library |
 | Registry Key | `HKCU\SOFTWARE\Classes\CLSID\{GUID}\InprocServer32` | COM Hijack persistence key |
 | Drop Path | `%APPDATA%\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\` | Startup persistence via path traversal |
 | Drop Path | `%LOCALAPPDATA%\Temp\` | Secondary drop location |
@@ -88,11 +88,11 @@ Investigation found no evidence of lateral movement from the compromised host. N
 
 | Tactic | Technique | Notes |
 |---|---|---|
-| Initial Access | T1566.001 — Phishing: Spearphishing Attachment | `Eli_Rosenfeld_CV.pdf` archive delivered via email *(PDF lists T1566 — T1566.001 more specific)* |
-| Execution | T1203 — Exploitation for Client Execution | CVE-2025-8088 path traversal triggered during WinRAR extraction *(not in PDF — added; the CVE exploitation is the execution mechanism and is entirely absent from the PDF's MITRE table)* |
-| Execution | T1204.002 — User Execution: Malicious File | User opened the archive |
-| Persistence | T1546.015 — Event Triggered Execution: COM Hijacking | `HKCU\SOFTWARE\Classes\CLSID\{GUID}\InprocServer32` set to msedges.dll |
-| Defense Evasion | T1036.005 — Masquerading: Match Legitimate Name or Location | msedges.dll masquerades as Microsoft Edge library *(PDF lists T1036 — T1036.005 more specific)* |
+| Initial Access | T1566.001 - Phishing: Spearphishing Attachment | `Eli_Rosenfeld_CV.pdf` archive delivered via email *(PDF lists T1566 - T1566.001 more specific)* |
+| Execution | T1203 - Exploitation for Client Execution | CVE-2025-8088 path traversal triggered during WinRAR extraction *(not in PDF - added; the CVE exploitation is the execution mechanism and is entirely absent from the PDF's MITRE table)* |
+| Execution | T1204.002 - User Execution: Malicious File | User opened the archive |
+| Persistence | T1546.015 - Event Triggered Execution: COM Hijacking | `HKCU\SOFTWARE\Classes\CLSID\{GUID}\InprocServer32` set to msedges.dll |
+| Defense Evasion | T1036.005 - Masquerading: Match Legitimate Name or Location | msedges.dll masquerades as Microsoft Edge library *(PDF lists T1036 - T1036.005 more specific)* |
 
 ---
 
@@ -105,13 +105,13 @@ Investigation found no evidence of lateral movement from the compromised host. N
 | msedges.dll extracted to Startup folder | `%APPDATA%\...\Startup\msedges.dll` |
 | msedges.dll extracted to Temp | `%LOCALAPPDATA%\Temp\msedges.dll` |
 | COM Hijack registry key written | `HKCU\...\CLSID\{GUID}\InprocServer32` → msedges.dll |
-| Next COM activation / user login | msedges.dll loaded — RomCom RAT active, C2 beacon starts |
+| Next COM activation / user login | msedges.dll loaded - RomCom RAT active, C2 beacon starts |
 
 ---
 
 ## 7. Verdict
 
-**True Positive — Malware (RomCom RAT)**
+**True Positive - Malware (RomCom RAT)**
 
 The alert correctly identified exploitation of CVE-2025-8088 via spearphishing. Persistence was established through COM Hijacking (T1546.015). No evidence of lateral movement or data exfiltration was found. Threat attributed to APT group UAC-0180 with high confidence based on malware family and TTPs.
 
@@ -143,7 +143,7 @@ reg delete "HKCU\SOFTWARE\Classes\CLSID\{<GUID>}" /f
 **Recovery:**
 1. Patch WinRAR to latest version (CVE-2025-8088 fixed in ≥ 7.x)
 2. Reset user credentials (assume compromised)
-3. Review email gateway — consider blocking `.rar` attachments from external senders if business justification allows
+3. Review email gateway - consider blocking `.rar` attachments from external senders if business justification allows
 4. Re-enable endpoint in network after clean scan
 
 **Detection hardening:**
@@ -154,7 +154,7 @@ reg delete "HKCU\SOFTWARE\Classes\CLSID\{<GUID>}" /f
 | Sysmon EID 13 | Registry write to `HKCU\...\CLSID\{GUID}\InprocServer32` |
 | Sysmon EID 1 | `winrar.exe` spawning unexpected child processes |
 | Email Gateway | Archive attachment containing DLL in path with `..\..\` traversal |
-| AV/EDR | Hash match — `msedges.dll` (romcom/buggie/marte family) |
+| AV/EDR | Hash match - `msedges.dll` (romcom/buggie/marte family) |
 
 ---
 

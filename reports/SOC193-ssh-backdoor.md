@@ -1,4 +1,4 @@
-# SOC193 — Possible SSH Backdoor Detected — Incident Report
+# SOC193 - Possible SSH Backdoor Detected - Incident Report
 
 **Analyst:** Stevan Mrkšić · **Platform:** LetsDefend · **Alert:** SOC193 · **EventID:** 143 · **Date:** 2023-05-05
 
@@ -10,7 +10,7 @@
 | Primary attacker IP | 149.34.244.182 |
 | Secondary attacker IP | 211.222.180.69 |
 | EDR Action | Allowed |
-| **Verdict** | **True Positive — SSH backdoor injected and successfully used** |
+| **Verdict** | **True Positive - SSH backdoor injected and successfully used** |
 
 ---
 
@@ -23,7 +23,7 @@ A new SSH authorized key with the comment `kali@kali` was injected into the `roo
 ## 2. Triage questions
 
 1. Did the attacker succeed in brute-forcing the password, or is the backdoor key the initial access?
-2. When exactly was the key injected — how much time elapsed between password success and key injection?
+2. When exactly was the key injected - how much time elapsed between password success and key injection?
 3. Has the backdoor key already been used for a follow-on authentication?
 4. What commands did the attacker run after gaining access?
 5. Is 149.34.244[.]182 known-malicious?
@@ -35,16 +35,16 @@ A new SSH authorized key with the comment `kali@kali` was injected into the `roo
 **3.1 Threat intelligence**
 
 - 149.34.244[.]182: AbuseIPDB 76 reports, flagged for Brute Force / Port Scan categories. ISP: Datacamp Limited, Amsterdam, Netherlands. This IP has a history of SSH brute-force activity.
-- 211.222.180[.]69: VirusTotal 5/87 engines flagged. ISP: Korea Telecom (KT), Republic of Korea. Used for the backdoor authentication — a separate, distinct IP from the brute-force origin.
+- 211.222.180[.]69: VirusTotal 5/87 engines flagged. ISP: Korea Telecom (KT), Republic of Korea. Used for the backdoor authentication - a separate, distinct IP from the brute-force origin.
 - Additional IPs observed in auth.log during the brute-force window: 183.104.247[.]190, 121.185.213[.]65 (separate scanners / brute-force attempts).
 
 **3.2 Brute-force initial access**
 
 `/var/log/auth.log` shows the brute-force progression:
 
-- **06:36 AM**: First reconnaisance probes from 149.34.244[.]182 — SSH connection attempts with invalid usernames.
-- **06:39 AM**: Brute-force begins — high-frequency `Failed password` entries for `root` from 149.34.244[.]182.
-- **06:40:36 AM**: `Accepted password for root from 149.34.244.182 port [ephemeral] ssh2` — password brute-force succeeded. Root account compromised.
+- **06:36 AM**: First reconnaisance probes from 149.34.244[.]182 - SSH connection attempts with invalid usernames.
+- **06:39 AM**: Brute-force begins - high-frequency `Failed password` entries for `root` from 149.34.244[.]182.
+- **06:40:36 AM**: `Accepted password for root from 149.34.244.182 port [ephemeral] ssh2` - password brute-force succeeded. Root account compromised.
 
 **3.3 Post-access reconnaissance**
 
@@ -58,7 +58,7 @@ cat /etc/shadow         # attempt to read hashed passwords
 netstat -an             # enumerate listening ports and active connections
 ```
 
-These are standard initial reconnaissance commands — confirming root access, mapping the system, and identifying further privilege escalation or lateral movement opportunities.
+These are standard initial reconnaissance commands - confirming root access, mapping the system, and identifying further privilege escalation or lateral movement opportunities.
 
 **3.4 Backdoor injection**
 
@@ -78,7 +78,7 @@ At **06:48:33 AM**, auth.log records:
 Accepted publickey for root from 211.222.180.69 port [ephemeral] ssh2
 ```
 
-A second, distinct IP (211.222.180[.]69) authenticated using the injected public key — confirming the backdoor was immediately operationalised. The attacker or a second actor now has persistent root access to vmserver via the backdoor key.
+A second, distinct IP (211.222.180[.]69) authenticated using the injected public key - confirming the backdoor was immediately operationalised. The attacker or a second actor now has persistent root access to vmserver via the backdoor key.
 
 ---
 
@@ -91,7 +91,7 @@ A second, distinct IP (211.222.180[.]69) authenticated using the injected public
 | IPv4 | 183.104.247[.]190 | Additional brute-force scanner observed in auth.log |
 | IPv4 | 121.185.213[.]65 | Additional brute-force scanner observed in auth.log |
 | SSH Public Key | `ssh-rsa AAAAB3NzaC1yc2E...kali@kali` | Backdoor key injected into /root/.ssh/authorized_keys |
-| File path | /root/.ssh/authorized_keys | Modified by attacker — contains backdoor key |
+| File path | /root/.ssh/authorized_keys | Modified by attacker - contains backdoor key |
 | Account | root | Brute-forced and backdoored |
 
 ---
@@ -100,14 +100,14 @@ A second, distinct IP (211.222.180[.]69) authenticated using the injected public
 
 | Tactic | Technique | Notes |
 |---|---|---|
-| Initial Access | T1110.001 — Brute Force: Password Guessing | High-frequency SSH root password attempts, 06:39–06:40 AM *(PDF lists T1110.003 Password Spraying — corrected; same username tested with many passwords = Guessing, not Spraying)* |
-| Initial Access | T1021.004 — Remote Services: SSH | SSH used for both initial access and backdoor exploitation *(not in PDF — added)* |
-| Persistence | T1098.004 — Account Manipulation: SSH Authorized Keys | `echo "ssh-rsa...kali@kali" >> /root/.ssh/authorized_keys` |
-| Persistence | T1078.003 — Valid Accounts: Local Accounts | Compromised root account used for access *(not in PDF — added)* |
-| Discovery | T1087.001 — Account Discovery: Local Account | `cat /etc/passwd` and `cat /etc/shadow` *(not in PDF — added)* |
-| Discovery | T1082 — System Information Discovery | `uname -a` kernel version check *(not in PDF — added)* |
-| Discovery | T1033 — System Owner/User Discovery | `id` command post-compromise *(not in PDF — added)* |
-| Execution | T1059.004 — Command and Scripting Interpreter: Unix Shell | Interactive bash session; all recon and injection commands |
+| Initial Access | T1110.001 - Brute Force: Password Guessing | High-frequency SSH root password attempts, 06:39–06:40 AM *(PDF lists T1110.003 Password Spraying - corrected; same username tested with many passwords = Guessing, not Spraying)* |
+| Initial Access | T1021.004 - Remote Services: SSH | SSH used for both initial access and backdoor exploitation *(not in PDF - added)* |
+| Persistence | T1098.004 - Account Manipulation: SSH Authorized Keys | `echo "ssh-rsa...kali@kali" >> /root/.ssh/authorized_keys` |
+| Persistence | T1078.003 - Valid Accounts: Local Accounts | Compromised root account used for access *(not in PDF - added)* |
+| Discovery | T1087.001 - Account Discovery: Local Account | `cat /etc/passwd` and `cat /etc/shadow` *(not in PDF - added)* |
+| Discovery | T1082 - System Information Discovery | `uname -a` kernel version check *(not in PDF - added)* |
+| Discovery | T1033 - System Owner/User Discovery | `id` command post-compromise *(not in PDF - added)* |
+| Execution | T1059.004 - Command and Scripting Interpreter: Unix Shell | Interactive bash session; all recon and injection commands |
 
 ---
 
@@ -115,12 +115,12 @@ A second, distinct IP (211.222.180[.]69) authenticated using the injected public
 
 | Time | Event |
 |---|---|
-| 2023-05-05 06:36 AM | Reconnaisance probes from 149.34.244[.]182 — invalid usernames over SSH |
-| 06:39 AM | Brute-force begins — repeated `Failed password for root` entries |
-| 06:40:36 AM | **`Accepted password for root` from 149.34.244[.]182** — brute-force success |
+| 2023-05-05 06:36 AM | Reconnaisance probes from 149.34.244[.]182 - invalid usernames over SSH |
+| 06:39 AM | Brute-force begins - repeated `Failed password for root` entries |
+| 06:40:36 AM | **`Accepted password for root` from 149.34.244[.]182** - brute-force success |
 | 06:40–06:44 AM | Attacker runs: id, uname -a, cat /etc/passwd, cat /etc/shadow, netstat -an |
-| 06:44:49 AM | **Backdoor key injected** — `echo "ssh-rsa...kali@kali" >> /root/.ssh/authorized_keys` |
-| 06:48:33 AM | **`Accepted publickey for root` from 211.222.180[.]69** — backdoor used; persistent access confirmed |
+| 06:44:49 AM | **Backdoor key injected** - `echo "ssh-rsa...kali@kali" >> /root/.ssh/authorized_keys` |
+| 06:48:33 AM | **`Accepted publickey for root` from 211.222.180[.]69** - backdoor used; persistent access confirmed |
 
 Total time from first failed password to backdoor exploitation: **~12 minutes**.
 
@@ -128,9 +128,9 @@ Total time from first failed password to backdoor exploitation: **~12 minutes**.
 
 ## 7. Verdict
 
-**True Positive — SSH backdoor injected and successfully exploited.**
+**True Positive - SSH backdoor injected and successfully exploited.**
 
-The attack chain is complete and forensically verified across auth.log entries: brute-force initial access (06:40:36), reconnaissance (06:40–06:44), backdoor injection (06:44:49), and confirmed backdoor authentication from a second IP (06:48:33). The attacker has established persistent root access to vmserver that survives password rotation — the backdoor key must be removed and the authorized_keys file fully audited before the host is trusted again.
+The attack chain is complete and forensically verified across auth.log entries: brute-force initial access (06:40:36), reconnaissance (06:40–06:44), backdoor injection (06:44:49), and confirmed backdoor authentication from a second IP (06:48:33). The attacker has established persistent root access to vmserver that survives password rotation - the backdoor key must be removed and the authorized_keys file fully audited before the host is trusted again.
 
 The two distinct IPs (149.34.244[.]182 for brute-force, 211.222.180[.]69 for backdoor auth) suggest either a second actor picking up the access, or the same actor operating from a second machine for the persistent foothold.
 
@@ -150,9 +150,9 @@ The two distinct IPs (149.34.244[.]182 for brute-force, 211.222.180[.]69 for bac
 - Block 149.34.244[.]182 and 211.222.180[.]69 at the perimeter firewall and search all other Linux hosts for authentication events from these IPs.
 
 **Escalate to L2 with:**
-- Full auth.log for forensic review — confirm whether the 06:48 session (211.222.180[.]69) performed any further actions
+- Full auth.log for forensic review - confirm whether the 06:48 session (211.222.180[.]69) performed any further actions
 - Review `/root/.ssh/authorized_keys` on all other servers for unknown keys
-- Scope of root access on vmserver — what services run as root, what data is accessible
+- Scope of root access on vmserver - what services run as root, what data is accessible
 
 **Eradication:**
 - Force-reset the root account password.
@@ -164,7 +164,7 @@ The two distinct IPs (149.34.244[.]182 for brute-force, 211.222.180[.]69 for bac
 
 **Hardening:**
 - Disable direct root login over SSH (`PermitRootLogin no` in `/etc/ssh/sshd_config`)
-- Disable password authentication for SSH (`PasswordAuthentication no`) — require key-based auth only with pre-approved keys
+- Disable password authentication for SSH (`PasswordAuthentication no`) - require key-based auth only with pre-approved keys
 - Restrict SSH access to known management IPs via firewall (`AllowUsers` and `AllowGroups` as secondary controls)
 - Deploy `fail2ban` or equivalent to lock out IPs after repeated authentication failures
 

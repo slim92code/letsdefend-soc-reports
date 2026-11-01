@@ -1,4 +1,4 @@
-# SOC272 — DNS Tunneling / RDP Brute Force + Exfiltration — Incident Report
+# SOC272 - DNS Tunneling / RDP Brute Force + Exfiltration - Incident Report
 
 **Analyst:** Stevan Mrkšić · **Platform:** LetsDefend · **Alert:** SOC272 · **EventID:** 246 · **Date:** 2024-04-04
 
@@ -10,8 +10,8 @@
 | Source IP (brute force) | 185.107.56.136 |
 | Dest IP (DNS exfil) | 60.216.3.126 |
 | Protocol | DNS (port 53) |
-| EDR Action | N/A — endpoint unmanaged at time of detection |
-| **Verdict** | **True Positive — confirmed compromise, data exfiltration executed** |
+| EDR Action | N/A - endpoint unmanaged at time of detection |
+| **Verdict** | **True Positive - confirmed compromise, data exfiltration executed** |
 
 ---
 
@@ -44,13 +44,13 @@ Firewall logs: 172.16.20.191 → 60.216.3.126:53 (UDP), 20 connections in the 10
 
 Not a legitimate DNS server.
 
-**3.3 RDP brute force — initial access**
+**3.3 RDP brute force - initial access**
 
 Firewall logs (dest port 3389) from 185.107.56.136 to 172.16.20.191, starting 09:54 AM:
 
-- 09:54 AM: EventID 4625 — logon failure, error `0xC000006A` ("user name is correct but the password is wrong"), username: `LetsDefend`.
+- 09:54 AM: EventID 4625 - logon failure, error `0xC000006A` ("user name is correct but the password is wrong"), username: `LetsDefend`.
 - Repeated attempts 09:54–09:58 AM.
-- 09:58 AM: EventID 4624 — **successful logon**, Logon Type 10 (RemoteInteractive/RDP), username: `LetsDefend`, source: 185[.]107.56.136.
+- 09:58 AM: EventID 4624 - **successful logon**, Logon Type 10 (RemoteInteractive/RDP), username: `LetsDefend`, source: 185[.]107.56.136.
 
 Brute force succeeded. The attacker now has an authenticated interactive session.
 
@@ -78,7 +78,7 @@ Python script found in `C:\Users\LETSDE~1\Downloads\`:
 - Encodes each chunk in a DNS query packet (`www.example.com` as the domain label carrier)
 - Sends to `60.216.3.126:53`, 10 iterations, with `time.sleep(0.1)` between each packet
 
-This is textbook DNS data exfiltration — data encoded in the query payload, generating high-volume DNS traffic to a non-DNS IP. Wireshark capture confirms uniform 138-byte DNS packets from the endpoint, with exfiltrated text visible in the hex dump.
+This is textbook DNS data exfiltration - data encoded in the query payload, generating high-volume DNS traffic to a non-DNS IP. Wireshark capture confirms uniform 138-byte DNS packets from the endpoint, with exfiltrated text visible in the hex dump.
 
 ---
 
@@ -99,16 +99,16 @@ This is textbook DNS data exfiltration — data encoded in the query payload, ge
 
 | Tactic | Technique | Notes |
 |---|---|---|
-| Initial Access | T1133 — External Remote Services | RDP (3389) exposed to internet |
-| Initial Access | T1078 — Valid Accounts: Default Accounts | Account `LetsDefend` brute-forced |
-| Credential Access | T1110.001 — Brute Force: Password Guessing | ~4 mins, multiple EID 4625 events before success *(PDF lists T1110.003 Password Spraying — corrected; 0xC000006A confirms same username tested repeatedly, which is Guessing, not Spraying)* |
-| Collection | T1005 — Data from Local System | SAM hive path, PowerShell history, Chrome AppData browsed *(not in PDF — added)* |
-| Discovery | T1033 — System Owner/User Discovery | `whoami /groups` *(not in PDF — added)* |
-| Execution | T1059.001 — PowerShell | Defender disable commands |
-| Execution | T1059.006 — Python | `test.py` DNS exfil script |
-| Defense Evasion | T1562.001 — Disable or Modify Tools | `Set-MpPreference -DisableRealtimeMonitoring $true` |
-| Defense Evasion | T1562.004 — Disable or Modify System Firewall | `netsh Advfirewall set allprofiles state off` |
-| Exfiltration | T1048.003 — Exfiltration Over Alt Protocol: Non-C2 | Data chunked into UDP/DNS packets to 60.216.3.126:53 |
+| Initial Access | T1133 - External Remote Services | RDP (3389) exposed to internet |
+| Initial Access | T1078 - Valid Accounts: Default Accounts | Account `LetsDefend` brute-forced |
+| Credential Access | T1110.001 - Brute Force: Password Guessing | ~4 mins, multiple EID 4625 events before success *(PDF lists T1110.003 Password Spraying - corrected; 0xC000006A confirms same username tested repeatedly, which is Guessing, not Spraying)* |
+| Collection | T1005 - Data from Local System | SAM hive path, PowerShell history, Chrome AppData browsed *(not in PDF - added)* |
+| Discovery | T1033 - System Owner/User Discovery | `whoami /groups` *(not in PDF - added)* |
+| Execution | T1059.001 - PowerShell | Defender disable commands |
+| Execution | T1059.006 - Python | `test.py` DNS exfil script |
+| Defense Evasion | T1562.001 - Disable or Modify Tools | `Set-MpPreference -DisableRealtimeMonitoring $true` |
+| Defense Evasion | T1562.004 - Disable or Modify System Firewall | `netsh Advfirewall set allprofiles state off` |
+| Exfiltration | T1048.003 - Exfiltration Over Alt Protocol: Non-C2 | Data chunked into UDP/DNS packets to 60.216.3.126:53 |
 
 ---
 
@@ -118,7 +118,7 @@ This is textbook DNS data exfiltration — data encoded in the query payload, ge
 |---|---|
 | 2024-04-04 09:54 AM | RDP brute force begins, 185.107.56.136 → Shirley:3389 |
 | 09:54–09:57 AM | Multiple EID 4625 failures (valid username, wrong password) |
-| 09:58 AM | EID 4624 — successful RDP logon, user `LetsDefend` |
+| 09:58 AM | EID 4624 - successful RDP logon, user `LetsDefend` |
 | 09:58–10:00 AM | Attacker enumerates groups, reads SAM path, PS history, Chrome data |
 | ~10:00 AM | Defender + firewall disabled via PowerShell |
 | ~10:00–10:03 AM | test.py downloaded/created in Downloads, test.txt staged |
@@ -129,13 +129,13 @@ This is textbook DNS data exfiltration — data encoded in the query payload, ge
 
 ## 7. Verdict
 
-**True Positive — confirmed full-chain attack.**
+**True Positive - confirmed full-chain attack.**
 
 The DNS tunneling alert is the final stage of a 10-minute attack: RDP brute force → valid account compromised → credential collection → defense evasion → data exfiltration.
 
 **Severity reassessed to Critical.** The original alert is "High" for DNS volume alone. Accounting for: (1) successful RDP brute-force on an internet-exposed port, (2) Defender and firewall completely disabled, (3) active data exfiltration confirmed, the correct severity is Critical.
 
-The two attacker IPs are distinct (185.107.56.136 for RDP, 60.216.3.126 for DNS exfil) — the attacker likely used separate infrastructure for initial access and data collection, a common OpSec pattern.
+The two attacker IPs are distinct (185.107.56.136 for RDP, 60.216.3.126 for DNS exfil) - the attacker likely used separate infrastructure for initial access and data collection, a common OpSec pattern.
 
 ---
 
@@ -145,14 +145,14 @@ The two attacker IPs are distinct (185.107.56.136 for RDP, 60.216.3.126 for DNS 
 - Host Shirley (172.16.20.191) isolated via endpoint containment.
 
 **Escalate to L2 with:**
-- `test.py` preserved for malware analysis — the full script and its target IP
+- `test.py` preserved for malware analysis - the full script and its target IP
 - Confirm what data was in scope at time of exfiltration (files in the LetsDefend user profile, Chrome saved passwords, PS history contents)
-- Scope of the `LetsDefend` account — what other systems can it authenticate to?
+- Scope of the `LetsDefend` account - what other systems can it authenticate to?
 - Check for any other hosts that communicated with 185.107.56.136 or 60.216.3.126
 - Full disk image of Shirley before any remediation
 
 **Remediation:**
-- Disable or firewall-restrict RDP (3389) — must not be internet-accessible
+- Disable or firewall-restrict RDP (3389) - must not be internet-accessible
 - Enforce account lockout policy (EID 4625 events over 4 minutes should have locked the account before success)
 - Force password reset for `LetsDefend` account and audit all accounts on the host
 - Remove `test.py` and `test.txt`; re-enable Defender and firewall before bringing the host back online
